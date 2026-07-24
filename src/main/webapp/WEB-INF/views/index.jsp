@@ -1,3 +1,4 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!doctype html>
 <html lang="ko">
 <head>
@@ -5,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Chatbot 2</title>
     <style>
-        :root { color-scheme: light; font-family: Arial, sans-serif; }
+        :root { font-family: Arial, sans-serif; }
         body { margin: 0; background: #f5f7fb; color: #1f2937; }
         main { width: min(760px, calc(100% - 32px)); margin: 48px auto; }
         h1 { margin-bottom: 8px; }
@@ -28,14 +29,14 @@
     <section class="panel">
         <label for="userId">사용자 ID</label>
         <input id="userId" placeholder="app_users.user_id 값을 입력하세요">
-
         <label for="message">메시지</label>
         <textarea id="message" placeholder="메시지를 입력하세요"></textarea>
-        <button id="sendButton">전송</button>
+        <button id="sendButton" type="button">전송</button>
         <div id="result"></div>
     </section>
 </main>
 <script>
+    const contextPath = '${pageContext.request.contextPath}';
     const userId = document.querySelector('#userId');
     const message = document.querySelector('#message');
     const button = document.querySelector('#sendButton');
@@ -50,19 +51,17 @@
             result.textContent = '사용자 ID와 메시지를 입력하세요.';
             return;
         }
-
         button.disabled = true;
         result.textContent = '응답을 기다리는 중입니다...';
         try {
-            const response = await fetch('/api/chat', {
+            const response = await fetch(contextPath + '/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-User-Id': user },
                 body: JSON.stringify({ message: text })
             });
             const body = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(body.message || '요청에 실패했습니다.');
-            const messages = body.messages || [];
-            const answer = messages.findLast(item => item.role === 'ASSISTANT');
+            const answer = (body.messages || []).findLast(item => item.role === 'ASSISTANT');
             result.textContent = answer ? answer.content : '응답이 없습니다.';
         } catch (error) {
             result.className = 'error';
