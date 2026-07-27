@@ -4,72 +4,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Chatbot 2</title>
+    <title>Chatbot 2 - 로그인</title>
+
     <style>
-        :root { font-family: Arial, sans-serif; }
-        body { margin: 0; background: #f5f7fb; color: #1f2937; }
-        main { width: min(760px, calc(100% - 32px)); margin: 48px auto; }
-        h1 { margin-bottom: 8px; }
-        .notice { color: #64748b; margin-bottom: 24px; }
-        .panel { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px #0f172a0d; }
-        label { display: block; margin: 12px 0 6px; font-weight: 600; }
-        input, textarea, button { width: 100%; box-sizing: border-box; font: inherit; border-radius: 10px; }
-        input, textarea { border: 1px solid #cbd5e1; padding: 11px 12px; }
-        textarea { min-height: 120px; resize: vertical; }
-        button { margin-top: 16px; border: 0; padding: 12px; background: #2563eb; color: white; cursor: pointer; }
-        button:disabled { opacity: .6; cursor: wait; }
-        #result { margin-top: 20px; white-space: pre-wrap; line-height: 1.6; }
-        .error { color: #b91c1c; }
+        :root {
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        main {
+            width: min(900px, calc(100% - 32px));
+            margin: 48px auto;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+        }
+
+        .notice {
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+
+        .message {
+            color: #047857;
+        }
+
+        .error {
+            color: #b91c1c;
+        }
+
+        .auth-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 24px #0f172a0d;
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            font-weight: 600;
+        }
+
+        input,
+        button {
+            width: 100%;
+            box-sizing: border-box;
+            font: inherit;
+            border-radius: 10px;
+        }
+
+        input {
+            border: 1px solid #cbd5e1;
+            padding: 11px 12px;
+        }
+
+        button {
+            margin-top: 16px;
+            border: 0;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+
+        @media (max-width: 700px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
+
 <body>
 <main>
     <h1>Chatbot 2</h1>
-    <p class="notice">Spring Boot 4 + MySQL + Spring Data JPA + Spring AI</p>
-    <section class="panel">
-        <label for="userId">사용자 ID</label>
-        <input id="userId" placeholder="app_users.user_id 값을 입력하세요">
-        <label for="message">메시지</label>
-        <textarea id="message" placeholder="메시지를 입력하세요"></textarea>
-        <button id="sendButton" type="button">전송</button>
-        <div id="result"></div>
-    </section>
-</main>
-<script>
-    const contextPath = '${pageContext.request.contextPath}';
-    const userId = document.querySelector('#userId');
-    const message = document.querySelector('#message');
-    const button = document.querySelector('#sendButton');
-    const result = document.querySelector('#result');
+    <p class="notice">로그인 후 챗봇을 이용할 수 있습니다.</p>
 
-    button.addEventListener('click', async () => {
-        const user = userId.value.trim();
-        const text = message.value.trim();
-        result.className = '';
-        if (!user || !text) {
-            result.className = 'error';
-            result.textContent = '사용자 ID와 메시지를 입력하세요.';
-            return;
-        }
-        button.disabled = true;
-        result.textContent = '응답을 기다리는 중입니다...';
-        try {
-            const response = await fetch(contextPath + '/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-User-Id': user },
-                body: JSON.stringify({ message: text })
-            });
-            const body = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(body.message || '요청에 실패했습니다.');
-            const answer = (body.messages || []).findLast(item => item.role === 'ASSISTANT');
-            result.textContent = answer ? answer.content : '응답이 없습니다.';
-        } catch (error) {
-            result.className = 'error';
-            result.textContent = error.message;
-        } finally {
-            button.disabled = false;
-        }
-    });
-</script>
+    <p class="message">${message}</p>
+    <p class="error">${error}</p>
+
+    <div class="auth-container">
+        <section class="panel">
+            <h2>로그인</h2>
+
+            <form action="${pageContext.request.contextPath}/auth/login"
+                  method="post">
+
+                <label for="loginEmail">이메일</label>
+                <input
+                        id="loginEmail"
+                        name="email"
+                        type="email"
+                        autocomplete="email"
+                        required
+                >
+
+                <label for="loginPassword">비밀번호</label>
+                <input
+                        id="loginPassword"
+                        name="password"
+                        type="password"
+                        autocomplete="current-password"
+                        required
+                >
+
+                <button type="submit">로그인</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <h2>회원가입</h2>
+
+            <form action="${pageContext.request.contextPath}/auth/signup"
+                  method="post">
+
+                <label for="displayName">이름</label>
+                <input
+                        id="displayName"
+                        name="displayName"
+                        type="text"
+                        required
+                >
+
+                <label for="signupEmail">이메일</label>
+                <input
+                        id="signupEmail"
+                        name="email"
+                        type="email"
+                        autocomplete="email"
+                        required
+                >
+
+                <label for="signupPassword">비밀번호</label>
+                <input
+                        id="signupPassword"
+                        name="password"
+                        type="password"
+                        autocomplete="new-password"
+                        required
+                >
+
+                <button type="submit">회원가입</button>
+            </form>
+        </section>
+    </div>
+</main>
 </body>
 </html>
