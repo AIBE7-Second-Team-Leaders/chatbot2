@@ -9,7 +9,7 @@ import java.util.List;
 public final class ChatDtos {
     private ChatDtos() {}
 
-    public record SendMessageRequest(String message, String conversationId) {}
+    public record SendMessageRequest(String message, String conversationId, String model) {}
 
     public record ConversationResponse(String conversationId, String title, Instant updatedAt) {
         public static ConversationResponse from(Conversation conversation) {

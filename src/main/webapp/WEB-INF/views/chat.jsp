@@ -61,6 +61,16 @@
             resize: vertical;
         }
 
+        select {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #cbd5e1;
+            padding: 11px 12px;
+            border-radius: 10px;
+            font: inherit;
+            background: white;
+        }
+
         button {
             margin-top: 16px;
             border: 0;
@@ -121,6 +131,13 @@
     <p class="notice">Spring Boot 4 + MySQL + Spring Data JPA + Spring AI</p>
     <section class="panel">
 
+        <label for="model">모델</label>
+        <select id="model">
+            <option value="groq">Groq (OpenAI 호환)</option>
+            <option value="gemini">Google Gemini</option>
+            <option value="nim">NVIDIA NIM</option>
+        </select>
+
         <label for="message">메시지</label>
         <textarea id="message" placeholder="메시지를 입력하세요"></textarea>
         <button id="sendButton" type="button">전송</button>
@@ -129,6 +146,7 @@
 </main>
 <script>
     const contextPath = '${pageContext.request.contextPath}';
+    const model = document.querySelector('#model');
     const message = document.querySelector('#message');
     const button = document.querySelector('#sendButton');
     const result = document.querySelector('#result');
@@ -154,7 +172,8 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    message: text
+                    message: text,
+                    model: model.value
                 })
             });
 
