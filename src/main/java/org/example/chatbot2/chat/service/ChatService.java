@@ -12,6 +12,7 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +27,8 @@ public class ChatService {
     private final ChatClient chatClient;
 
     public ChatService(AppUserRepository userRepository, ConversationRepository conversationRepository,
-                       MessageRepository messageRepository, ChatClient chatClient) {
+                       MessageRepository messageRepository,
+                       @Qualifier("openAiChatClient") ChatClient chatClient) {
         this.userRepository = userRepository;
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
