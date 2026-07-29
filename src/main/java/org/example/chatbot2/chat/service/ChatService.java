@@ -24,15 +24,21 @@ public class ChatService {
     private final AppUserRepository userRepository;
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
-    private final ChatClient chatClient;
+    private final ChatClient groqChatClient;
+    private final ChatClient geminiChatClient;
+    private final ChatClient nimChatClient;
 
     public ChatService(AppUserRepository userRepository, ConversationRepository conversationRepository,
                        MessageRepository messageRepository,
-                       @Qualifier("openAiChatClient") ChatClient chatClient) {
+                       @Qualifier("openAiChatClient") ChatClient groqChatClient,
+                       @Qualifier("googleGenAiChatClient") ChatClient geminiChatClient,
+                       @Qualifier("nimChatClient") ChatClient nimChatClient) {
         this.userRepository = userRepository;
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
-        this.chatClient = chatClient;
+        this.groqChatClient = groqChatClient;
+        this.geminiChatClient = geminiChatClient;
+        this.nimChatClient = nimChatClient;
     }
 
     public List<ChatDtos.ConversationResponse> listConversations(String userId) {
@@ -52,6 +58,8 @@ public class ChatService {
     public ChatDtos.ChatResponse send(String userId, ChatDtos.SendMessageRequest request) {
         String content = request == null || request.message() == null ? "" : request.message().trim();
         if (content.isBlank()) throw new IllegalArgumentException("message must not be blank");
+        String model = normalizeModel(request == null ? null : request.model());
+        ChatClient chatClient = chatClientFor(model);
 
         AppUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("user not found: " + userId));
@@ -67,10 +75,28 @@ public class ChatService {
                 .messages(history.stream().map(this::toPromptMessage).toList())
                 .call().content();
 
-        messageRepository.save(new Message(conversation, "ASSISTANT", answer, null));
+        messageRepository.save(new Message(conversation, "ASSISTANT", answer, model));
         conversation.touch();
         conversationRepository.save(conversation);
         return getConversation(userId, conversation.getConversationId());
+    }
+
+    private ChatClient chatClientFor(String model) {
+        return switch (model) {
+            case "gemini" -> geminiChatClient;
+            case "nim" -> nimChatClient;
+            default -> groqChatClient;
+        };
+    }
+
+    private String normalizeModel(String model) {
+        if (model == null || model.isBlank()) return "groq";
+        return switch (model.trim().toLowerCase()) {
+            case "groq", "openai" -> "groq";
+            case "gemini" -> "gemini";
+            case "nim" -> "nim";
+            default -> throw new IllegalArgumentException("unsupported model: " + model);
+        };
     }
 
     private org.springframework.ai.chat.messages.Message toPromptMessage(Message message) {
