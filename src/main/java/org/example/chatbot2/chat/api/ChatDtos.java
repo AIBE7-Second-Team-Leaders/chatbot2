@@ -11,6 +11,8 @@ public final class ChatDtos {
 
     public record SendMessageRequest(String message, String conversationId, String model) {}
 
+    public record RenameConversationRequest(String title) {}
+
     public record ConversationResponse(String conversationId, String title, Instant updatedAt) {
         public static ConversationResponse from(Conversation conversation) {
             return new ConversationResponse(conversation.getConversationId(), conversation.getTitle(), conversation.getUpdatedAt());

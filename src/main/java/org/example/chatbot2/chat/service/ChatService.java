@@ -55,6 +55,30 @@ public class ChatService {
     }
 
     @Transactional
+    public ChatDtos.ConversationResponse renameConversation(
+            String userId,
+            String conversationId,
+            String title
+    ) {
+        String normalizedTitle = title == null ? "" : title.trim();
+        if (normalizedTitle.isBlank()) {
+            throw new IllegalArgumentException("title must not be blank");
+        }
+
+        Conversation conversation = getOwnedConversation(userId, conversationId);
+        conversation.rename(normalizedTitle.length() > 200
+                ? normalizedTitle.substring(0, 200)
+                : normalizedTitle);
+        return ChatDtos.ConversationResponse.from(conversationRepository.save(conversation));
+    }
+
+    @Transactional
+    public void deleteConversation(String userId, String conversationId) {
+        Conversation conversation = getOwnedConversation(userId, conversationId);
+        conversationRepository.delete(conversation);
+    }
+
+    @Transactional
     public ChatDtos.ChatResponse send(String userId, ChatDtos.SendMessageRequest request) {
         String content = request == null || request.message() == null ? "" : request.message().trim();
         if (content.isBlank()) throw new IllegalArgumentException("message must not be blank");
