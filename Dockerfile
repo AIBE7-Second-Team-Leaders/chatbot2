@@ -9,6 +9,5 @@ WORKDIR /usr/local/tomcat/webapps
 
 RUN sed -i 's/port="8005"/port="-1"/' $CATALINA_HOME/conf/server.xml
 RUN rm -rf ROOT
-COPY --from=build /app/target/archat-1.0-SNAPSHOT.war ROOT.war
-
+COPY --from=build /app/target/chatbot2-0.0.1-SNAPSHOT.war ROOT.war
 EXPOSE 8080
