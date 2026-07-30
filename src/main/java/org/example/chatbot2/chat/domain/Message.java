@@ -32,6 +32,9 @@ public class Message {
     @Column(name = "model_name", length = 100)
     private String modelName;
 
+    @Column(nullable = false, columnDefinition = "JSON")
+    private String metadata = "{}";
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -42,6 +45,7 @@ public class Message {
         this.role = role;
         this.content = content;
         this.modelName = modelName;
+        this.metadata = "{}";
     }
 
     @PrePersist

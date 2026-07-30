@@ -42,6 +42,29 @@ public class ChatController {
         return chatService.send(userId, request);
     }
 
+    @PatchMapping("/conversations/{conversationId}")
+    public ChatDtos.ConversationResponse renameConversation(
+            HttpSession session,
+            @PathVariable String conversationId,
+            @RequestBody ChatDtos.RenameConversationRequest request
+    ) {
+        String userId = getLoginUserId(session);
+        return chatService.renameConversation(
+                userId,
+                conversationId,
+                request == null ? null : request.title()
+        );
+    }
+
+    @DeleteMapping("/conversations/{conversationId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteConversation(
+            HttpSession session,
+            @PathVariable String conversationId
+    ) {
+        chatService.deleteConversation(getLoginUserId(session), conversationId);
+    }
+
     private String getLoginUserId(HttpSession session) {
         Object userId = session.getAttribute("loginUserId");
         if (userId == null) {
